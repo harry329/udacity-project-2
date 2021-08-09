@@ -92,14 +92,18 @@ public class CarControllerTest {
     @Test
     public void updateCar() throws Exception {
         Car car = getCar();
-        car.setId(1L);
         car.setCondition(Condition.NEW);
-        mvc.perform(
-                post(new URI("/cars"))
+        car.setId(1L);
+        given(carService.save(any())).willReturn(car);
+        MvcResult result = mvc.perform(
+                put(new URI("/cars/1"))
                         .content(json.write(car).getJson())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isCreated());
+                        .accept(MediaType.APPLICATION_JSON_UTF8)).andReturn();
+        String content = result.getResponse().getContentAsString();
+        JSONObject updatedCar = new JSONObject(content);
+        assertEquals(updatedCar.getString("id"), "1");
+        assertEquals(updatedCar.getString("condition"), "NEW");
     }
 
     /**
